@@ -1,4 +1,4 @@
-# @consuo/web-component-up-next
+# @consuo/web-component-epg
 
 A simple Web component that from the Consuo Schedule API fetches the schedule and show as a single channel epg component.
 
