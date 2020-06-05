@@ -1,5 +1,6 @@
 import { update } from "./utils/scheduleService";
 import { ATTTRIBUTES } from "./utils/constants";
+import { isScrolledIntoView } from "./utils/helpers";
 
 export class ConsuoEPG extends HTMLElement {
   static get observedAttributes() {
@@ -82,9 +83,19 @@ export class ConsuoEPG extends HTMLElement {
     this.style();
 
     const active = this.querySelector("div[data-active='active'");
-    active.scrollIntoView({
-      inline: "center",
-    });
+    if (isScrolledIntoView(active)) {
+      active.scrollIntoView({
+        inline: "center",
+      });
+    } else {
+      window.addEventListener("scroll", () => {
+        if (isScrolledIntoView(active)) {
+          active.scrollIntoView({
+            inline: "center",
+          });
+        }
+      });
+    }
   }
 
   renderProgramItem(program) {
