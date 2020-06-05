@@ -2,7 +2,8 @@
 
 A simple Web component that from the Consuo Schedule API fetches the schedule and show as a single channel epg component.
 
-![Up next Screenshot](epg-screenshot.png)
+![EPG Screenshot](epg-screenshot.png)
+![EPG progress Screenshot](epg-screenshot-progress.png)
 
 ## Install
 
