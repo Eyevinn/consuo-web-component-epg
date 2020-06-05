@@ -23,7 +23,7 @@ import "@consuo/web-component-epg";
 and use it in your html
 
 ```html
-<consuo-epg api-url="" channel-id="" update-interval=""></consuo-up-next>
+<consuo-epg api-url="" channel-id="" update-interval=""></consuo-epg>
 ```
 
 or entirely in JavaScript, just as any other standard html element.
