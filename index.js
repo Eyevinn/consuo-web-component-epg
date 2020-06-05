@@ -21,11 +21,6 @@ export class ConsuoEPG extends HTMLElement {
     this[ATTTRIBUTES.UPDATE_INTERVAL] = this.getAttribute(
       ATTTRIBUTES.UPDATE_INTERVAL
     );
-
-    // /**
-    //  * Set up the simple styling for the element
-    //  */
-    // this.style();
     /**
      * Call fetch data if we have the correct attributes
      */
@@ -49,7 +44,6 @@ export class ConsuoEPG extends HTMLElement {
       }
       div.program-item {
         padding: 10px 20px;
-        // width: 200px;
       }
       div[data-active="active"] {
         background-color: rgba(0,0,0,0.2);
