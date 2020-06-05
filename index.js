@@ -43,10 +43,23 @@ export class ConsuoEPG extends HTMLElement {
         margin: 0;
       }
       div.program-item {
+        position: relative;
         padding: 10px 20px;
+        border-right: 1px solid #c9c9c9;
+      }
+      div.program-item span.progress {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 3px;
+        width: 0px;
+        background-color: darkred;
       }
       div[data-active="active"] {
         background-color: rgba(0,0,0,0.2);
+      }
+      div[data-active="active"] span.progress {
+        background-color: red;
       }
     `;
     this.appendChild(style);
@@ -75,6 +88,13 @@ export class ConsuoEPG extends HTMLElement {
   }
 
   renderProgramItem(program) {
+    const programStartTime = program.start_time;
+    const programEndTime = program.end_time;
+    const programDuration = programEndTime - programStartTime;
+    const percentage = Math.floor(
+      ((Date.now() - programStartTime) / programDuration) * 100
+    );
+
     const startTime = new Date(program.start).toLocaleTimeString();
     const endTime = new Date(program.end).toLocaleTimeString();
     const currentTime = new Date().toLocaleTimeString();
@@ -85,12 +105,15 @@ export class ConsuoEPG extends HTMLElement {
         : program.duration < 150
         ? 150
         : program.duration;
+    const progress =
+      endTime < currentTime ? "100%" : active ? `${percentage}%` : "0%";
     return `
       <div class="program-item" ${
         active ? "data-active='active'" : ""
       } style="width: ${width}px;">
         <h3>${program.title}</h3>
         <span>${startTime} - ${endTime}</span>
+        <span class="progress" style="width:${progress};"></span>
       </div>
     `;
   }
