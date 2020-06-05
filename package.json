@@ -1,6 +1,6 @@
 {
   "name": "@consuo/web-component-epg",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Show a Consuo schedule",
   "main": "index.js",
   "scripts": {
