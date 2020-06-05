@@ -81,7 +81,7 @@ export class ConsuoEPG extends HTMLElement {
     this.appendChild(container);
     this.style();
 
-    const active = document.querySelector("div[data-active='active'");
+    const active = this.querySelector("div[data-active='active'");
     active.scrollIntoView({
       inline: "center",
     });
