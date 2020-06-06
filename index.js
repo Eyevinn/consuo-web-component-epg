@@ -2,6 +2,7 @@ import { cssStyle } from "./style";
 import { update } from "./utils/scheduleService";
 import { ATTTRIBUTES } from "./utils/constants";
 import { isScrolledIntoView } from "./utils/helpers";
+import { isActiveProgram, progress } from "./utils/time";
 
 export class ConsuoEPG extends HTMLElement {
   static get observedAttributes() {
@@ -27,7 +28,7 @@ export class ConsuoEPG extends HTMLElement {
      * Call fetch data if we have the correct attributes
      */
     this.innerHTML = ``;
-    this.refresh();
+    this.refreshEPG();
   }
 
   style() {
@@ -52,6 +53,7 @@ export class ConsuoEPG extends HTMLElement {
     });
 
     this.appendChild(container);
+    this.refreshProgressBars();
     this.style();
 
     const active = this.querySelector("div[data-active='active'");
@@ -68,59 +70,77 @@ export class ConsuoEPG extends HTMLElement {
         }
       });
     }
+
   }
 
   renderProgramItem(program) {
-    const programStartTime = program.start_time;
-    const programEndTime = program.end_time;
-    const programDuration = programEndTime - programStartTime;
-    const percentage = Math.floor(
-      ((Date.now() - programStartTime) / programDuration) * 100
-    );
-
     const startTime = new Date(program.start).toLocaleTimeString();
     const endTime = new Date(program.end).toLocaleTimeString();
-    const currentTime = new Date().toLocaleTimeString();
-    const active = startTime < currentTime && currentTime < endTime;
-    const width =
+    const active = isActiveProgram(program);
+
+    const programItemWidth =
       program.duration > 500
         ? 500
         : program.duration < 150
         ? 150
         : program.duration;
-    const progress =
-      endTime < currentTime ? "100%" : active ? `${percentage}%` : "0%";
+
     return `
       <div class="program-item" ${
         active ? "data-active='active'" : ""
-      } style="width: ${width}px;">
+      } data-uri='${program.uri}' style="width: ${programItemWidth}px;">
         <h3>${program.title}</h3>
         <span>${startTime} - ${endTime}</span>
-        <span class="progress" style="width:${progress};"></span>
       </div>
     `;
   }
 
-  async refresh() {
-    /**
-     * If a scheduler is set up since before, delete it since we will create a new one if the interval has changed
-     */
+  renderProgressBar() {
+    const programItems = this.querySelectorAll(".program-item");
+    for (let i = 0; i < programItems.length; i++) {
+      const programItemCard = programItems[i];
+      const program = this.schedule[i];
+
+      const endTime = new Date(program.end).toLocaleTimeString();
+      const currentTime = new Date().toLocaleTimeString();
+
+      const isActive = isActiveProgram(program);
+      const markedAsActive = programItemCard.getAttribute("data-active");
+      if (!isActive && markedAsActive) {
+        programItemCard.removeAttribute("data-active");
+      } else if (isActive && !markedAsActive) {
+        programItemCard.setAttribute("data-active", "active");
+      }
+
+      const percentage = progress(program);
+      const progressWidth =
+        endTime < currentTime ? "100%" : isActive ? `${percentage}%` : "0%";
+      let progressBar = programItemCard.querySelector(".progress");
+      if (!progressBar) {
+        progressBar = document.createElement("span");
+        progressBar.className = "progress";
+        programItemCard.append(progressBar);
+      }
+      progressBar.style.width = progressWidth;
+    }
+  }
+
+  async refreshProgressBars() {
+    setInterval(() => {
+      this.renderProgressBar();
+    }, 1000);
+  }
+
+  async refreshEPG() {
     if (this.scheduleUpdater) {
       clearInterval(this.scheduleUpdater);
     }
-
-    /**
-     * If we have the api url and channel id we can at least do a single schedule call
-     */
     if (this[ATTTRIBUTES.API_URL] && this[ATTTRIBUTES.CHANNEL_ID]) {
       this.schedule = await update(
         this[ATTTRIBUTES.API_URL],
         this[ATTTRIBUTES.CHANNEL_ID]
       );
       this.render();
-      /**
-       * If we have an interval specified as well, we can set it up to refresh the schedule
-       */
       if (this[ATTTRIBUTES.UPDATE_INTERVAL]) {
         this.scheduleUpdater = setInterval(async () => {
           this.schedule = await update(
@@ -134,15 +154,9 @@ export class ConsuoEPG extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    /**
-     * Set the internal property to the new attribute value
-     */
     this[name] = newValue;
-    /**
-     * Only refresh if we do not go from null, since that will happen in the setup
-     */
     if (oldValue) {
-      this.refresh();
+      this.refreshEPG();
     }
   }
 

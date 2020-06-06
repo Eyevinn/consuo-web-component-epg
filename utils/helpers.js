@@ -4,4 +4,4 @@ export const isScrolledIntoView = (el) => {
   var elemBottom = rect.bottom;
   var isVisible = elemTop >= 0 && elemBottom <= window.innerHeight;
   return isVisible;
-}
+};
